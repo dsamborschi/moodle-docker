@@ -1,0 +1,69 @@
+# Copyright VMware, Inc.
+# SPDX-License-Identifier: APACHE-2.0
+
+version: '2'
+services:
+  mariadb:
+    image: docker.io/bitnami/mariadb:11.2
+    ports:
+      - '3306:3306'
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+      - MARIADB_USER=bn_moodle
+      - MARIADB_DATABASE=bitnami_moodle
+      - MARIADB_CHARACTER_SET=utf8mb4
+      - MARIADB_COLLATE=utf8mb4_unicode_ci
+    healthcheck:
+      interval: 30s
+      retries: 3
+      test:
+        [
+          "CMD",
+          "healthcheck.sh",
+          "--su-mysql",
+          "--connect",
+          "--innodb_initialized"
+        ]
+      timeout: 30s
+    volumes:
+      - 'mariadb_data:/bitnami/mariadb'
+    networks:
+      - moodle
+  moodle:
+    image: docker.io/bitnami/moodle:4.3
+    ports:
+      - '8080:8080'
+      - '8443:8443'
+    environment:
+      - MOODLE_USERNAME=user
+      - MOODLE_PASSWORD=Password12345
+      - MOODLE_EMAIL=user@example.com
+      - MOODLE_DATABASE_HOST=mariadb
+      - MOODLE_DATABASE_PORT_NUMBER=3306
+      - MOODLE_DATABASE_USER=bn_moodle
+      - MOODLE_DATABASE_NAME=bitnami_moodle
+      - MOODLE_SKIP_BOOTSTRAP=yes
+      - SMTP_HOST=smtp.gmail.com
+      - SMTP_PORT=587
+      - SMTP_USER=your_email@gmail.com
+      - SMTP_PASSWORD=your_password
+      - SMTP_PROTOCOL=tls
+      - ALLOW_EMPTY_PASSWORD=yes
+      - BITNAMI_DEBUG=true
+      - PHP_OPCACHE_MEMORY_CONSUMPTION=256M
+      - PHP_DISMOD=cgi_module,zend_extension
+    volumes:
+      - 'moodle_data:/bitnami/moodle'
+      - 'moodledata_data:/bitnami/moodledata'
+    depends_on:
+       mariadb:
+         condition: service_healthy
+    networks:
+      - moodle
+networks:
+   moodle:
+      driver: bridge
+volumes:
+  mariadb_data:
+  moodle_data:
+  moodledata_data:
