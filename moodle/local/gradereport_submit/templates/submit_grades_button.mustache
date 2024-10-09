@@ -1,0 +1,24 @@
+<script type="text/javascript">
+        window.addEventListener("load", function() {
+            const footer = document.querySelector(".fixed-bottom"); 
+            if (footer) {
+                const customButton = document.createElement("button");
+                customButton.innerHTML = "Submit Grades";
+                customButton.classList.add("btn", "btn-primary");
+                customButton.id = "submit-grades-button";
+
+                footer.appendChild(customButton);
+
+                // Add click event for the button.
+                customButton.addEventListener("click", function() {
+                    if (confirm("Are you sure you want to proceed?")) {
+                       console.log('User confirmed the action');
+                       window.location.href = M.cfg.wwwroot + "{{ link }}" + {{ courseid }};
+                     } else {
+                       console.log('User canceled the action');
+                     }
+               
+                });
+            }
+        });
+</script>
