@@ -34,13 +34,16 @@ class report {
         return $users;
     }
 
-    public static function submit_report_for_approval($courseid) {
+    public static function submit_report_for_approval($courseid, $userid) {
         global $DB;
+        // Get the current timestamp
+        $currenttimestamp = time();
+
         $record = new \stdClass();
         $record->courseid = $courseid;
-        $record->submitted = 0; // Pending approval.
+        $record->submitted_by = $userid; 
+        $record->submitted_date = $currenttimestamp; 
         $DB->insert_record('gradereport_submissions', $record);
-
     }
 
 
@@ -48,47 +51,57 @@ class report {
         global $DB;
 
         // Get all pending reports
-        return $DB->get_records('gradereport_submissions', ['submitted' => 0]);
+        return $DB->get_records('gradereport_submissions', ['published' => 0]);
     }
 
-    public static function submit_grade_reports($reportid) {
+    public static function submit_grade_report($courseid) {
         global $DB;
     
-        $report = $DB->get_record('gradereport_submissions', ['id' => $reportid, 'submitted' => 0], '*', MUST_EXIST);
-        $courseid = $report->courseid;
+        $report = $DB->get_record('gradereport_submissions', ['courseid' => $courseid, 'published' => 0], '*', MUST_EXIST);
+        $coursecontext = \context_course::instance($courseid);
         $reportdata = 'course grades report data goes here';
-        $submitted_date = time();
-        $submitted_by = $USER->id;
+        $submitted_date = $report->submitted_date;
+        $submitted_by = $report->submitted_by;
         $adminconfig = get_config('local_gradereport_submit');
         $externalurl = $adminconfig->externalurl;
     
         // use CURL to send report data to the external URL
-        $curl = new curl();
-        $options = [
-            'CURLOPT_RETURNTRANSFER' => true,
-            'CURLOPT_HTTPHEADER' => ['Content-Type: application/json'],
-        ];
+        // $curl = new curl();
+        // $options = [
+        //     'CURLOPT_RETURNTRANSFER' => true,
+        //     'CURLOPT_HTTPHEADER' => ['Content-Type: application/json'],
+        // ];
     
-        $postdata = json_encode([
-            'courseid' => $report->courseid,
-            'reportdata' => $reportdata
-        ]);
+        // $postdata = json_encode([
+        //     'courseid' => $report->courseid,
+        //     'reportdata' => $reportdata
+        // ]);
     
-        $response = $curl->post($externalurl, $postdata, $options);
+        // $response = $curl->post($externalurl, $postdata, $options);
 
 
         //mark as submitted
-        $DB->set_field('gradereport_submissions', 'submitted', 1, ['id' => $reportid]);
-        $DB->set_field('gradereport_submissions', 'submitted_date', $submitted_date, ['id' => $reportid]);
-        $DB->set_field('gradereport_submissions', 'submitted_by', $submitted_by, ['id' => $reportid]);
+        $DB->set_field('gradereport_submissions', 'published', 1, ['id' => $reportid]);
         $DB->set_field('gradereport_submissions', 'report_data', $reportdata,  ['id' => $reportid]);
+        $DB->set_field('gradereport_submissions', 'published_date', time(),  ['id' => $reportid]);
+
+
+        // if the current user is an admin with grade editing capabilities
+        if (has_capability('moodle/grade:edit', $coursecontext)) {
+            // Remove the permission to edit grades
+            // You'll need to prevent grade editing by adjusting role capabilities
+            $roleid = $DB->get_field('role', 'id', array('shortname' => 'teacher'));
+            if ($roleid) {
+                // Disable course grade editing for instructors
+                role_change_permission($roleid, $coursecontext , 'moodle/grade:edit', CAP_PROHIBIT);
+            }
+        }
 
 
         //raise a log create event
-
-        $event = grade_report_submitted_log::create(array(
+        $event = \local_gradereport_submit\event\eventgrade_report_submitted_log::create(array(
             'objectid' => $courseid,
-            'context' => context_course::instance($courseid),
+            'context' => $coursecontext,
             'relateduserid' => $submitted_by
         ));
         

@@ -24,13 +24,12 @@ if ($pending_reports) {
         
         echo html_writer::div("Course Name: {$course->fullname}");
 
-        
         $grader_url = new moodle_url('/grade/report/grader/index.php', ['id' => $courseid]);
         // Display the link in your custom plugin
         echo html_writer::link($grader_url, get_string('viewgrades', 'local_gradereport_submit'));
 
-        $url = new moodle_url('/local/gradereport_submit/approve.php', ['id' => $rpt->id]);
-        $button = new single_button($url, get_string('submitgrades', 'local_gradereport_submit'), 'post');
+        $url = new moodle_url('/local/gradereport_submit/publish.php', ['courseid' => $course->id]);
+        $button = new single_button($url, get_string('publishgrades', 'local_gradereport_submit'), 'post');
 
         echo $renderer->render($button);
     }

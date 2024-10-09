@@ -1,6 +1,7 @@
 <?php
 
 
+// require_once('../../config.php');
 
 defined('MOODLE_INTERNAL') || die();
 

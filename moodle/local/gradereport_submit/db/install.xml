@@ -5,10 +5,11 @@
     <FIELDS>
     <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
     <FIELD NAME="courseid" TYPE="int" LENGTH="10" NOTNULL="true"/>
-    <FIELD NAME="approved" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
-    <FIELD NAME="report_data" TYPE="string" LENGTH="1000" NOTNULL="true" DEFAULT=""/>
-    <FIELD NAME="submiited_by" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
-    <FIELD NAME="submiited_data" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
+    <FIELD NAME="submitted" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0"/>
+    <FIELD NAME="report_data" TYPE="text" LENGTH="1000" NOTNULL="false" DEFAULT=""/>
+    <FIELD NAME="submiited_by" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+    <FIELD NAME="submiited_date" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0"/>
+    <FIELD NAME="published_date" TYPE="int" LENGTH="10" NOTNULL="false" DEFAULT="0"/>
     </FIELDS>
     <KEYS>
       <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

@@ -7,6 +7,7 @@ $string['gradereport_submit_link'] = 'Submit Grades';
 $string['approve'] = 'Approve';
 $string['reportapproved'] = 'Grades report was approved';
 $string['submitgrades'] = 'Submit Grades';
+$string['publishgrades'] = 'Publish Grades';
 $string['viewgrades'] = 'View Grades';
 $string['coursesubmittedlog'] = 'Custom course log event';
 
